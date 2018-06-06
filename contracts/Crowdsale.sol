@@ -11,38 +11,36 @@ contract Crowdsale is ReentrancyHandling, Owned {
   using SafeMath for uint256;
   
   struct ContributorData {
-    bool isWhiteListed;
-    bool isCommunityRoundApproved;
     uint256 contributionAmount;
     uint256 tokensIssued;
   }
 
   mapping(address => ContributorData) public contributorList;
 
-  enum state { pendingStart, communityRound, crowdsaleStarted, crowdsaleEnded }
-  state crowdsaleState;
+  enum state { pendingStart, presaleStart, saleStart, saleEnd }
+  state saleState;
 
-  uint public communityRoundStartDate;
-  uint public crowdsaleStartDate;
-  uint public crowdsaleEndDate;
+  uint public presaleDate;
+  uint public saleDate;
+  uint public endDate;
 
-  event CommunityRoundStarted(uint timestamp);
-  event CrowdsaleStarted(uint timestamp);
-  event CrowdsaleEnded(uint timestamp);
+  event PresaleStarted(uint timestamp);
+  event SaleStarted(uint timestamp);
+  event SaleEnded(uint timestamp);
 
   IToken token = IToken(0x0);
   uint ethToTokenConversion;
 
-  uint256 maxCrowdsaleCap;
-  uint256 maxCommunityCap;
-  uint256 maxCommunityWithoutBonusCap;
+  uint256 maxSaleCap;
+  uint256 maxPresaleCap;
+  uint256 maxPresaleWithoutBonusCap;
   uint256 maxContribution;
 
 
   uint256 tokenSold = 0;
-  uint256 communityTokenSold = 0;
-  uint256 communityTokenWithoutBonusSold = 0;
-  uint256 crowdsaleTokenSold = 0;
+  uint256 presaleTokenSold = 0;
+  uint256 presaleTokenWithoutBonusSold = 0;
+  uint256 mainsaleTokenSold = 0;
   uint256 public ethRaisedWithoutCompany = 0;
 
   address companyAddress;   // company wallet address in cold/hardware storage 
@@ -54,12 +52,6 @@ contract Crowdsale is ReentrancyHandling, Owned {
   bool ownerHasClaimedCompanyTokens = false;
 
 
-  // validates sender is whitelisted
-  modifier onlyWhiteListUser {
-    require(contributorList[msg.sender].isWhiteListed == true);
-    _;
-  }
-
   // limit gas price to 50 Gwei (about 5-10x the normal amount)
   modifier onlyLowGasPrice {
 	  require(tx.gasprice <= 50*10**9 wei);
@@ -69,19 +61,18 @@ contract Crowdsale is ReentrancyHandling, Owned {
   //
   // Unnamed function that runs when eth is sent to the contract
   //
-  function() public noReentrancy onlyWhiteListUser onlyLowGasPrice payable {
-    require(msg.value != 0);                                         // Throw if value is 0
+  function() public noReentrancy onlyLowGasPrice payable {
+    require(msg.value != 0);                                    // Throw if value is 0
     require(companyAddress != 0x0);
     require(token != IToken(0x0));
 
-    checkCrowdsaleState();                                           // Calibrate crowdsale state
+    checkSaleState();                                           // Calibrate sale state
 
-    assert((crowdsaleState == state.communityRound && contributorList[msg.sender].isCommunityRoundApproved) ||
-            crowdsaleState == state.crowdsaleStarted);
+    assert((saleState == state.presaleStart) || saleState == state.saleStart);
     
-    processTransaction(msg.sender, msg.value);                       // Process transaction and issue tokens
+    processTransaction(msg.sender, msg.value);                  // Process transaction and issue tokens
 
-    checkCrowdsaleState();                                           // Calibrate crowdsale state
+    checkSaleState();                                           // Calibrate sale state
   }
 
   // 
@@ -90,51 +81,51 @@ contract Crowdsale is ReentrancyHandling, Owned {
   function getState() public constant returns (uint256, uint256, uint) {
     uint currentState = 0;
 
-    if (crowdsaleState == state.pendingStart) {
+    if (saleState == state.pendingStart) {
       currentState = 1;
     }
-    else if (crowdsaleState == state.communityRound) {
+    else if (saleState == state.presaleStart) {
       currentState = 2;
     }
-    else if (crowdsaleState == state.crowdsaleStarted) {
+    else if (saleState == state.saleStart) {
       currentState = 3;
     }
-    else if (crowdsaleState == state.crowdsaleEnded) {
+    else if (saleState == state.saleEnd) {
       currentState = 4;
     }
 
-    return (tokenSold, communityTokenSold, currentState);
+    return (tokenSold, presaleTokenSold, currentState);
   }
 
   //
-  // Check crowdsale state and calibrate it
+  // Check sale state and calibrate it
   //
-  function checkCrowdsaleState() internal {
-    if (now > crowdsaleEndDate || tokenSold >= maxTokenSupply) {  // end crowdsale once all tokens are sold or run out of time
-      if (crowdsaleState != state.crowdsaleEnded) {
-        crowdsaleState = state.crowdsaleEnded;
-        CrowdsaleEnded(now);
+  function checkSaleState() internal {
+    if (now > endDate || tokenSold >= maxTokenSupply) {  // end sale once all tokens are sold or run out of time
+      if (saleState != state.saleEnd) {
+        saleState = state.saleEnd;
+        SaleEnded(now);
       }
     }
-    else if (now > crowdsaleStartDate) { // move into crowdsale round
-      if (crowdsaleState != state.crowdsaleStarted) {
-        uint256 communityTokenRemaining = maxCommunityCap.sub(communityTokenSold);  // apply any remaining tokens from community round to crowdsale round
-        maxCrowdsaleCap = maxCrowdsaleCap.add(communityTokenRemaining);
-        crowdsaleState = state.crowdsaleStarted;  // change state
-        CrowdsaleStarted(now);
+    else if (now > saleDate) { // move into main sale round
+      if (saleState != state.saleStart) {
+        uint256 presaleTokenRemaining = maxPresaleCap.sub(presaleTokenSold);  // apply any remaining tokens from presale round to main sale round
+        maxSaleCap = maxSaleCap.add(presaleTokenRemaining);
+        saleState = state.saleStart;  // change state
+        SaleStarted(now);
       }
     }
-    else if (now > communityRoundStartDate) {
-      if (communityTokenSold < maxCommunityCap) {
-        if (crowdsaleState != state.communityRound) {
-          crowdsaleState = state.communityRound;
-          CommunityRoundStarted(now);
+    else if (now > presaleDate) {
+      if (presaleTokenSold < maxPresaleCap) {
+        if (saleState != state.presaleStart) {
+          saleState = state.presaleStart;
+          PresaleStarted(now);
         }
       }
-      else {  // automatically start crowdsale when all community round tokens are sold out 
-        if (crowdsaleState != state.crowdsaleStarted) {
-          crowdsaleState = state.crowdsaleStarted;
-          CrowdsaleStarted(now);
+      else {  // automatically start sale when all presale round tokens are sold out 
+        if (saleState != state.saleStart) {
+          saleState = state.saleStart;
+          SaleStarted(now);
         }
       }
     }
@@ -143,78 +134,77 @@ contract Crowdsale is ReentrancyHandling, Owned {
   //
   // Issue tokens and return if there is overflow
   //
-  function calculateCommunity(address _contributor, uint256 _newContribution) internal returns (uint256, uint256) {
-    uint256 communityEthAmount = 0;
-    uint256 communityTokenAmount = 0;
+  function calculatePresale(address _contributor, uint256 _newContribution) internal returns (uint256, uint256) {
+    uint256 presaleEthAmount = 0;
+    uint256 presaleTokenAmount = 0;
 
     uint previousContribution = contributorList[_contributor].contributionAmount;  // retrieve previous contributions
 
-    // community round ONLY
-    if (crowdsaleState == state.communityRound && 
-        contributorList[_contributor].isCommunityRoundApproved && 
+    // presale round ONLY
+    if (saleState == state.presaleStart && 
         previousContribution < maxContribution) {
-        communityEthAmount = _newContribution;
+        presaleEthAmount = _newContribution;
 
         uint256 availableEthAmount = maxContribution.sub(previousContribution);                 
-        // limit the contribution ETH amount to the maximum allowed for the community round
-        if (communityEthAmount > availableEthAmount) {
-          communityEthAmount = availableEthAmount;
+        // limit the contribution ETH amount to the maximum allowed for the presale round
+        if (presaleEthAmount > availableEthAmount) {
+          presaleEthAmount = availableEthAmount;
         }
 
-        // compute community tokens without bonus
-        communityTokenAmount = communityEthAmount.mul(ethToTokenConversion);
+        // compute presale tokens without bonus
+        presaleTokenAmount = presaleEthAmount.mul(ethToTokenConversion);
 
-        uint256 availableTokenAmount = maxCommunityWithoutBonusCap.sub(communityTokenWithoutBonusSold);
+        uint256 availableTokenAmount = maxPresaleWithoutBonusCap.sub(presaleTokenWithoutBonusSold);
 
-        // verify community tokens do not go over the max cap for community round
-        if (communityTokenAmount > availableTokenAmount) {
-          // cap the tokens to the max allowed for the community round
-          communityTokenAmount = availableTokenAmount;
+        // verify presale tokens do not go over the max cap for presale round
+        if (presaleTokenAmount > availableTokenAmount) {
+          // cap the tokens to the max allowed for the presale round
+          presaleTokenAmount = availableTokenAmount;
           // recalculate the corresponding ETH amount
-          communityEthAmount = communityTokenAmount.div(ethToTokenConversion);
+          presaleEthAmount = presaleTokenAmount.div(ethToTokenConversion);
         }
 
-        // track tokens sold during community round
-        communityTokenWithoutBonusSold = communityTokenWithoutBonusSold.add(communityTokenAmount);
+        // track tokens sold during presale round
+        presaleTokenWithoutBonusSold = presaleTokenWithoutBonusSold.add(presaleTokenAmount);
 
         // compute bonus tokens
-        uint256 bonusTokenAmount = communityTokenAmount.mul(15);
+        uint256 bonusTokenAmount = presaleTokenAmount.mul(15);
         bonusTokenAmount = bonusTokenAmount.div(100);
 
-        // add bonus to community tokens
-        communityTokenAmount = communityTokenAmount.add(bonusTokenAmount);
+        // add bonus to presale tokens
+        presaleTokenAmount = presaleTokenAmount.add(bonusTokenAmount);
 
-        // track tokens sold during community round
-        communityTokenSold = communityTokenSold.add(communityTokenAmount);
+        // track tokens sold during presale round
+        presaleTokenSold = presaleTokenSold.add(presaleTokenAmount);
     }
 
-    return (communityTokenAmount, communityEthAmount);
+    return (presaleTokenAmount, presaleEthAmount);
   }
 
   //
   // Issue tokens and return if there is overflow
   //
-  function calculateCrowdsale(uint256 _remainingContribution) internal returns (uint256, uint256) {
-    uint256 crowdsaleEthAmount = _remainingContribution;
+  function calculateSale(uint256 _remainingContribution) internal returns (uint256, uint256) {
+    uint256 saleEthAmount = _remainingContribution;
 
-    // compute crowdsale tokens
-    uint256 crowdsaleTokenAmount = crowdsaleEthAmount.mul(ethToTokenConversion);
+    // compute sale tokens
+    uint256 saleTokenAmount = saleEthAmount.mul(ethToTokenConversion);
 
-    // determine crowdsale tokens remaining
-    uint256 availableTokenAmount = maxCrowdsaleCap.sub(crowdsaleTokenSold);
+    // determine main sale tokens remaining
+    uint256 availableTokenAmount = maxSaleCap.sub(mainsaleTokenSold);
 
-    // verify crowdsale tokens do not go over the max cap for crowdsale round
-    if (crowdsaleTokenAmount > availableTokenAmount) {
-      // cap the tokens to the max allowed for the crowdsale round
-      crowdsaleTokenAmount = availableTokenAmount;
+    // verify main sale tokens do not go over the max cap for main sale round
+    if (saleTokenAmount > availableTokenAmount) {
+      // cap the tokens to the max allowed for the main sale round
+      saleTokenAmount = availableTokenAmount;
 
       // recalculate the corresponding ETH amount
-      crowdsaleEthAmount = crowdsaleTokenAmount.div(ethToTokenConversion);
+      saleEthAmount = saleTokenAmount.div(ethToTokenConversion);
     }
-    // track tokens sold during crowdsale round
-    crowdsaleTokenSold = crowdsaleTokenSold.add(crowdsaleTokenAmount);
+    // track tokens sold during main sale round
+    mainsaleTokenSold = mainsaleTokenSold.add(saleTokenAmount);
 
-    return (crowdsaleTokenAmount, crowdsaleEthAmount);
+    return (saleTokenAmount, saleEthAmount);
   }
 
   //
@@ -223,13 +213,13 @@ contract Crowdsale is ReentrancyHandling, Owned {
   function processTransaction(address _contributor, uint256 _amount) internal {
     uint256 newContribution = _amount;
 
-    var (communityTokenAmount, communityEthAmount) = calculateCommunity(_contributor, newContribution);
+    var (presaleTokenAmount, presaleEthAmount) = calculatePresale(_contributor, newContribution);
 
-    // compute remaining ETH amount available for purchasing crowdsale tokens
-    var (crowdsaleTokenAmount, crowdsaleEthAmount) = calculateCrowdsale(newContribution.sub(communityEthAmount));
+    // compute remaining ETH amount available for purchasing main sale tokens
+    var (saleTokenAmount, saleEthAmount) = calculateSale(newContribution.sub(presaleEthAmount));
 
-    // add up crowdsale + community tokens
-    uint256 tokenAmount = crowdsaleTokenAmount.add(communityTokenAmount);
+    // add up main sale + presale tokens
+    uint256 tokenAmount = saleTokenAmount.add(presaleTokenAmount);
 
     assert(tokenAmount > 0);
 
@@ -240,7 +230,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
     contributorList[_contributor].tokensIssued = contributorList[_contributor].tokensIssued.add(tokenAmount);                
 
     // Add contribution amount to existing contributor
-    newContribution = crowdsaleEthAmount.add(communityEthAmount);
+    newContribution = saleEthAmount.add(presaleEthAmount);
     contributorList[_contributor].contributionAmount = contributorList[_contributor].contributionAmount.add(newContribution);
 
     ethRaisedWithoutCompany = ethRaisedWithoutCompany.add(newContribution);                              // Add contribution amount to ETH raised
@@ -257,18 +247,6 @@ contract Crowdsale is ReentrancyHandling, Owned {
   }
 
   //
-  // whitelist validated participants.
-  //
-  function WhiteListContributors(address[] _contributorAddresses, bool[] _contributorCommunityRoundApproved) public onlyOwner {
-    require(_contributorAddresses.length == _contributorCommunityRoundApproved.length); // Check if input data is correct
-
-    for (uint cnt = 0; cnt < _contributorAddresses.length; cnt++) {
-      contributorList[_contributorAddresses[cnt]].isWhiteListed = true;
-      contributorList[_contributorAddresses[cnt]].isCommunityRoundApproved = _contributorCommunityRoundApproved[cnt];
-    }
-  }
-
-  //
   // Method is needed for recovering tokens accidentally sent to token address
   //
   function salvageTokensFromContract(address _tokenAddress, address _to, uint _amount) public onlyOwner {
@@ -276,7 +254,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
   }
 
   //
-  // Owner can set multisig address for crowdsale
+  // Owner can set company address
   //
   function setCompanyAddress(address _newAddress) public onlyOwner {
     require(!treasuryLocked);                              // Check if owner has already claimed tokens
@@ -308,11 +286,11 @@ contract Crowdsale is ReentrancyHandling, Owned {
   }
 
   //
-  // Claim remaining tokens when crowdsale ends
+  // Claim remaining tokens when sale ends
   //
   function claimRemainingTokens() public onlyOwner {
-    checkCrowdsaleState();                                        // Calibrate crowdsale state
-    require(crowdsaleState == state.crowdsaleEnded);              // Check crowdsale has ended
+    checkSaleState();                                             // Calibrate sale state
+    require(saleState == state.saleEnd);                          // Check sale has ended
     require(!ownerHasClaimedTokens);                              // Check if owner has already claimed tokens
     require(companyAddress != 0x0);
 
