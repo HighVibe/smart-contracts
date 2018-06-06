@@ -49,7 +49,7 @@ contract('Check Transaction', function(accounts) {
 	// 	// assert.equal()
 	// });
 
-	it('Sending Payment to Crowdsale during Community Round', async function() {
+	it('Sending Payment to Crowdsale during Pre-Sale Round', async function() {
 		// Create a HighVibeToken instance with the HighVibeCrowdsale address
 		// console.log('crowdsale address: ', crowdsale.address);
 		let expected_address = await hv.crowdsaleContractAddress();
