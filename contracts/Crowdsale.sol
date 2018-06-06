@@ -20,9 +20,9 @@ contract Crowdsale is ReentrancyHandling, Owned {
   enum state { pendingStart, presaleStart, saleStart, saleEnd }
   state saleState;
 
-  uint public presaleDate = 1530932400;         // pre-sale starts [7/7 midnight] 
-  uint public saleDate = presaleDate + 32 days; // 30 days later pre-sale starts [8/8 midnight]
-  uint public endDate = saleDate + 32 days;     // 30 days after main sale starts [9/9 midnight]
+  uint public presaleDate;
+  uint public saleDate;
+  uint public endDate;
 
   event PresaleStarted(uint timestamp);
   event SaleStarted(uint timestamp);

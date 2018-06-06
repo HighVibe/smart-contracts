@@ -4,20 +4,20 @@ import "./Crowdsale.sol";
 
 contract TestCrowdsale is Crowdsale {
   function TestCrowdsale() public {
-    communityRoundStartDate = now;   
-    crowdsaleStartDate = communityRoundStartDate + 1 hours;
-    crowdsaleEndDate = crowdsaleStartDate + 4 hours;
+    presaleDate = 1530932400;   
+    saleDate = presaleDate + 32 days;
+    endDate = saleDate + 32 days;
 
-    crowdsaleState = state.communityRound;
+    state currentState = state.presaleStart;
 
     ethToTokenConversion = 1;
 
     maxTokenSupply = 10.3 ether;
     companyTokens = 5 ether;             // allocation to company, private presale and users (marketing)
 
-    maxCommunityWithoutBonusCap = 2 ether;
-    maxCommunityCap = 2.3 ether;
-    maxCrowdsaleCap = 3 ether;
+    uint maxCommunityWithoutBonusCap = 2 ether;
+    uint maxCommunityCap = 2.3 ether;
+    uint maxCrowdsaleCap = 3 ether;
 
     maxContribution = 1 ether;                  // maximum contribution during community round
   }

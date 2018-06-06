@@ -57,11 +57,11 @@ contract('Check Transaction', function(accounts) {
 		assert.equal(expected_address, crowdsale.address, 'check Crowdsale contract address');
 
 		let currTimestamp = moment.utc().valueOf()/1000;
-		await crowdsale.setCrowdsaleDates(currTimestamp - 100, currTimestamp + 9000000, currTimestamp + 900000001);
+		await crowdsale.setCrowdsaleDates(currTimestamp - 100, currTimestamp, currTimestamp + 900000001);
 		let currState = await crowdsale.getCrowdsaleState();
 		currState_number = new web3.BigNumber(currState).toString();
-		let expectedState = 2; // Community Round = 2
-		assert.equal(currState_number, expectedState, 'check state == community round');
+		let expectedState = 2; // Presale Round = 2
+		assert.equal(currState_number, expectedState, 'check state == presale round');
 
 
 		// Set Token on HighVibeCrowdsale

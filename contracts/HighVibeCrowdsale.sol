@@ -12,20 +12,20 @@ contract HighVibeCrowdsale is Crowdsale {
     medium = "https://www.medium.com/highvibe-network/";
     telegram = "https://t.me/highvibenetworktoken";
 
-    communityRoundStartDate = 1510063200;                       // Nov 7, 2017 @ 6am PST
-    crowdsaleStartDate = communityRoundStartDate + 24 hours;    // 24 hours later
-    crowdsaleEndDate = communityRoundStartDate + 30 days + 12 hours; // 30 days + 12 hours later: Dec 7th, 2017 @ 6pm PST [1512698400]
+    presaleDate = 1530932400;                       // July 7, 2018 @ midninght GMT +3 [Estonian time]
+    saleDate = presaleDate + 32 days;    // 32 hours later
+    endDate = saleDate + 32 days; // 32 days later: September 9th, 2018 @ midnight GMT +3
 
-    crowdsaleState = state.pendingStart;
+    state currentState = state.pendingStart;
 
     ethToTokenConversion = 26950;                 // 1 ETH == 26,950 HighVibe tokens
 
     maxTokenSupply = 1200000000 ether;           // 1,200,000,000
     companyTokens = 600000000 ether;             // 20% company reserve, 20% team + advisors, 10% contributors + authors
 
-    maxCommunityWithoutBonusCap = 945000000 ether;
-    maxCommunityCap = 1086750000 ether;           // 945,000,000 with 15% bonus of 141,750,000
-    maxCrowdsaleCap = 788483829 ether;            // tokens allocated to crowdsale 
+    uint maxCommunityWithoutBonusCap = 945000000 ether;
+    uint maxCommunityCap = 1086750000 ether;           // 945,000,000 with 15% bonus of 141,750,000
+    uint maxCrowdsaleCap = 788483829 ether;            // tokens allocated to crowdsale 
 
     maxContribution = 100 ether;                  // maximum contribution during community round
   }
