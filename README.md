@@ -1,7 +1,7 @@
 HighVibe.Network Crowdsale
 ========================================================
 
-This respository contains smart contracts for the crowdsale of HighVibe.Network tokens. These contracts were initially developed by TokenMarket in an effort to create a standardized framework for ICO smart contracts.
+This respository contains smart contracts for the crowdsale of HighVibe.Network tokens.
 
 
 
