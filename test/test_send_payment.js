@@ -1,10 +1,10 @@
-var StormCrowdsale = artifacts.require('../contracts/StormCrowdsale');
-var StormToken = artifacts.require('../contracts/StormToken');
+var HighVibeCrowdsale = artifacts.require('../contracts/HighVibeCrowdsale');
+var HighVibeToken = artifacts.require('../contracts/HighVibeToken');
 const moment = require('moment');
 
 contract('Check Transaction', function(accounts) {
 	let crowdsale;
-	let stm;
+	let hv;
 
 	// Check Accounts Address
 	let account0 = web3.eth.accounts[0];
@@ -12,24 +12,24 @@ contract('Check Transaction', function(accounts) {
 	let account2 = web3.eth.accounts[2];
 
 	beforeEach(async function() {
-		crowdsale = await StormCrowdsale.deployed();
-		stm = await StormToken.deployed();
+		crowdsale = await HighVibeCrowdsale.deployed();
+		hv = await HighVibeToken.deployed();
 		console.log('crowdsale: ', crowdsale.address);
-		console.log('stormtoken: ', stm.address);
+		console.log('HighVibeToken: ', hv.address);
 	});	
 
-	it('Setting StormCrowdsale contract address to StormToken contract', async function() {
-		stm = await StormToken.deployed();
-		return StormToken(StormCrowdsale.address);
+	it('Setting HighVibeCrowdsale contract address to HighVibeToken contract', async function() {
+		hv = await HighVibeToken.deployed();
+		return HighVibeToken(HighVibeCrowdsale.address);
 	});
 
-	it('Setting company address to StormCrowdsale', async function() {
-		crowdsale = await StormCrowdsale.deployed();
+	it('Setting company address to HighVibeCrowdsale', async function() {
+		crowdsale = await HighVibeCrowdsale.deployed();
 		return crowdsale.setCompanyAddress(account0);
 	});
 
 	it('Check Initial Crowdsale State', async function() {
-		crowdsale = await StormCrowdsale.deployed();
+		crowdsale = await HighVibeCrowdsale.deployed();
 		let curr_state = await crowdsale.getCrowdsaleState();
 		let expected_state = 1; // Pending Start
 		assert.equal(expected_state, curr_state, 'Checking Pending Start State');
@@ -39,7 +39,7 @@ contract('Check Transaction', function(accounts) {
 	// 	// TODO: For all 3 States
 	// 	// Set the Community Round Start Date to before now
 	// 	//   => State is now Community Round
-	// 	crowdsale = await StormCrowdsale.deployed();
+	// 	crowdsale = await HighVibeCrowdsale.deployed();
 	// 	let new_cRSD = 1608504400; // Change Epoch time to before now
 	// 	let new_cSD = 1608590800; // Change Epoch time to before now
 	// 	let new_cED = 1611182800; // Change Epoch time to after now
@@ -50,9 +50,9 @@ contract('Check Transaction', function(accounts) {
 	// });
 
 	it('Sending Payment to Crowdsale during Community Round', async function() {
-		// Create a StormToken instance with the StormCrowdsale address
+		// Create a HighVibeToken instance with the HighVibeCrowdsale address
 		// console.log('crowdsale address: ', crowdsale.address);
-		let expected_address = await stm.crowdsaleContractAddress();
+		let expected_address = await hv.crowdsaleContractAddress();
 		console.log('expected address: ', expected_address);
 		assert.equal(expected_address, crowdsale.address, 'check Crowdsale contract address');
 
@@ -64,10 +64,10 @@ contract('Check Transaction', function(accounts) {
 		assert.equal(currState_number, expectedState, 'check state == community round');
 
 
-		// Set Token on StormCrowdsale
-		await crowdsale.setToken(StormToken.address);
+		// Set Token on HighVibeCrowdsale
+		await crowdsale.setToken(HighVibeToken.address);
 		let tokenAddress = await crowdsale.getToken();
-		assert.equal(StormToken.address, tokenAddress, 'check set token');
+		assert.equal(HighVibeToken.address, tokenAddress, 'check set token');
 		// Add accounts into white list
 		let accounts = [];
 		accounts.push(account1);
@@ -102,15 +102,15 @@ contract('Check Transaction', function(accounts) {
 		let value = 100; // 1 eth
 		
 
-		console.log('address: ', StormCrowdsale.address);
-		let initial_storm = await stm.balanceOf(account1);
+		console.log('address: ', HighVibeCrowdsale.address);
+		let initial_storm = await hv.balanceOf(account1);
 		let initial_storm_number = new web3.BigNumber(initial_storm).toString();
 		console.log('token balance: ', initial_storm);
 		console.log('token balance number: ', initial_storm_number);
 
 		web3.eth.sendTransaction({
 			from: account1,
-			to: StormCrowdsale.address,
+			to: HighVibeCrowdsale.address,
 			value: value,
 			gas: 4500000 //4,500,000
 		});
