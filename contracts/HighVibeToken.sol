@@ -2,7 +2,7 @@ pragma solidity ^0.4.13;
 
 import "./Token.sol";
 
-contract StormToken is Token {
+contract HighVibeToken is Token {
 
 	bool public transfersEnabled = false;    // true if transfer/transferFrom are enabled, false if not
 
@@ -13,10 +13,10 @@ contract StormToken is Token {
 
 
   /* Initializes contract */
-  function StormToken(address _crowdsaleAddress) public {
-    standard = "Storm Token v1.0";
-    name = "Storm Token";
-    symbol = "STORM"; // token symbol
+  function HighVibeToken(address _crowdsaleAddress) public {
+    standard = "HighVibe Network";
+    name = "HighVibe Network Token";
+    symbol = "HighVibe"; // token symbol
     decimals = 18;
     crowdsaleContractAddress = _crowdsaleAddress;
   }
