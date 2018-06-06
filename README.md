@@ -1,74 +1,38 @@
-# STORM Crowdsale
-This repository contains the smart contracts for the crowdsale of STORM tokens developed by [Rui Maximo](https://www.linkedin.com/in/maximo/) and co-authored by [Reo Shibatsuji](https://www.linkedin.com/in/reo-shibatsuji-a22716132/), recommendations provided by [Yudi Levi](https://www.linkedin.com/in/yudi-levi-4bb91911/). Test cases were developed by [Reo Shibatsuji](https://www.linkedin.com/in/reo-shibatsuji-a22716132/). 
+HighVibe.Network Crowdsale
+========================================================
 
-Auditing of the smart contracts performed by the [HOSHO GROUP](https://hosho.io).
-
-# Resources
-
-Official Site: https://stormtoken.com
-
-Link to 28x28png STORM icon: https://github.com/StormX-Inc/crowdsale/blob/master/images/LOGO.png
-
-Official Contact Email Address: info@stormtoken.com
-
-Link to blog: https://blog.stormtoken.com/
-
-Link to reddit: https://www.reddit.com/r/stormtoken/
-
-Link to facebook: https://www.facebook.com/stormtoken
-
-Link to twitter: https://twitter.com/Storm_Token
-
-Link to bitcointalk: https://bitcointalk.org/index.php?topic=2006999.msg21584885#msg21584885
-
-
-# Architecture
-The following diagram illustrates the design and dependencies between the smart contracts. 
-
-![STORM smart contract architecture](https://github.com/StormX-Inc/crowdsale/blob/Gold/images/architecture.png)
-
-# Smart Contract Design
-
-The smart contracts are composed of two main smart contracts: StormCrowdsale and StormToken. 
-
-The StormToken inherits from the Token, which is an ERC-20 smart contract that mints tokens and allows users to transfer tokens. The StormToken adds additional logic specific to Bancor and a bulk transfers function to make it easier to reward STORM PLAY users (previously BitMaker). Wallets such as Jaxx, MyEtherWallet (i.e. MEW) call the StormToken smart contract to show users how many STORM tokens they own.
-
-The StormCrowdsale smart contract handles the logic of the Crowdsale, and becomes obsolete once the Crowdsale ends. When the StormCrowdsale smart contract is deployed, the initial state is PENDING until the Community Appreciation Period begins on Nov 7th, 2017 @ 6am PST (2pm UTC). 
-
-There are 4 states:
-1.  pendingStart
-2.  communityRound
-3.  crowdsaleStarted
-4.  crowdsaleEnded
-
-All participants must be registered in the StormCrowdsale contributor’s list regardless of whether they are approved for the community appreciation period or the crowdsale period. If they are registered (i.e. whitelisted), they can participate and purchase STORM tokens.
-
-When the Community Appreciation Period starts, only registered participants approved for the Community Appreciation Sale Period can participate. All other participants attempting to send ETH to the StormCrowdsale will be rejected and refunded. 
-
-A Community Appreciation Period approved participant can send any amount of ETH. If the participant sends more than 100 ETH (say 500 ETH), only 100 ETH worth of tokens plus the 15% bonus from the Community Appreciation Period will be minted, and the remaining ETH (i.e. 400 ETH) will be immediately applied to purchase Crowdsale tokens. The STORM tokens are minted immediately, but will be locked until the Crowdsale ends – meaning participants cannot transfer their tokens to another address. 
-
-There are several mutually exclusive sub-scenarios:
-
-•   If the Community Appreciation Period STORM tokens are sold out, then all of the participant’s ETH (i.e. 500 ETH) will be applied to purchasing Crowdsale tokens. 
-•   If the Crowdsale period is sold out, then whatever is left over from buying Community Appreciation Period STORM tokens (i.e. 400 ETH) is refunded to the participant.
-
-The StormCrowdsale smart contract changes state from Community Appreciation Sale Period to the Crowdsale period when one of the following conditions are met:
-
-•   24 hours has elapsed from the start of the Community Appreciation Period (Nov 7th 2017 @ 6am PST).
-•   All the Community Appreciation period STORM tokens (including the 15% bonus amount) are sold out.
-
-This implies that the Community Appreciation period could last less than 24 hours, but no more than 24 hours. Should 24 hours elapse without selling out all the Community Appreciation period STORM tokens, then any remaining STORM tokens convert to be available as Crowdsale tokens and become eligible for purchase by any approved participant during the Crowdsale period at a 0% bonus rate.
-
-When the StormCrowdsale smart contract enters the Crowdsale period, all approved participants (including Community Appreciation approved participants) are eligible to participate. 
-
-During the Community Appreciation Period and Crowdsale Period, all transfers of tokens will be disallowed. The contract owner (i.e. CakeCodes Global SEZC, Inc.) manually unlocks token transfer at the end of the Crowdsale. At which point, participants can transfer their tokens as they please to another address.
-
-As soon as the StormCrowdsale smart contract receives ETH from participants, it immediately transfers the ETH received to a company wallet address for security reasons.
-
-The state of the StormCrowdsale changes from the Crowdsale period to ended when all STORM tokens are sold out or when 1 month and 12 hours have elapsed from the start of the Community Appreciation period (Crowdsale end date is Dec 7th, 2017 @ 6pm PST). If there are STORM tokens remaining after the Crowdsale end, the company (i.e. CakeCodes Global SEZC, Inc) can claim the remaining tokens.
+This respository contains smart contracts for the crowdsale of HighVibe.Network tokens. These contracts were initially developed by TokenMarket in an effort to create a standardized framework for ICO smart contracts.
 
 
 
+Resources
+=========================================================
+
+Official Site: https://www.highvibe.network/
+
+One-pager: https://www.highvibe.network/wp-content/uploads/2018/06/HighVibe.Network-Onepager.pdf
+
+Infographic: https://goo.gl/5zHTJj
+
+Whitepaper: Coming Soon
+
+Medium: https://medium.com/highvibe-network
+
+Telegram: https://t.me/highvibenetworktoken
 
 
-Storm Play™, Storm Gigs™, Storm Market™, Storm Task™, StormX™ and STORM Token™ are trademarks (™) of CakeCodes Global SEZC, Inc.
+
+Goals/Event Periods
+=========================================================
+
+The public ICO will consist of 2 separate selling periods, the Public Token Presale period and the Main Token Sale event period. Both the presale and main event periods will each sell a total of 1,200,000,000 (1.2 Billion) tokens. 
+
+The Public Token Presale period will begin on July 7th, 2018 and conclude on August 8th, 2018 or if the total tokens allotted for this event sell out. It will consist of 3 bonus tiers of 25%, 20% and 15%. The first 240,000,000 tokens sold will come with a 25% bonus, totalling 300,000,000 tokens for the first tier. The second tier will sell 250,000,000 tokens with an accompanying bonus of 20%, totalling 300,000,000 tokens. The final tier for the Public Token Presale will sell 521,739,130 tokens with a bonus of 15%, completing the Presale with 600,000,000 tokens sold for this tier and 1,200,000,000 total tokens sold overall.
+
+The Main Token Sale event period will begin on August 8th, 2018 and will conclude on September 9th, 2018 or if the total tokens allotted for this event sell out. It will consist of 4 separate selling tiers of 10%, 7.5%, 5% and finally a no bonus tier. The first 272,727,273 tokens sold will fall in the first tier, earning a 10% bonus on all tokens sold for a total of 300,000,000 tokens. The next 279,069,767 tokens sold will fall under the second tier, earning a 7.5% bonus for all tokens sold for a total of 300,000,000 for this tier. The third tier will sell a total of 285,714,286 tokens with a 5% bonus, totalling 300,000,000 tokens. The final tier, consisting of no bonus, will sell 300,000,000 tokens, completing the Main Token Sale event with a grand total of 1,200,000,000 tokens sold. 
+
+
+Execution
+==========================================================
+
+In order to accomplish these goals, we will utilize the tranched pricing strategy implemented in EthTranchePricing.sol alongside the other base ICO smart contracts.
