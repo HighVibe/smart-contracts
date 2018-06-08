@@ -17,7 +17,12 @@ contract Crowdsale is ReentrancyHandling, Owned {
 
   mapping(address => ContributorData) public contributorList;
 
-  mapping(address => uint256) public lockedTokensList;
+  struct LockData {
+    uint256 tokens;
+    uint period;
+  }
+
+  mapping(address => LockData) public lockedTokensList;
 
   enum state { pendingStart, presaleStart, saleStart, saleEnd }
   state saleState;
@@ -341,19 +346,21 @@ contract Crowdsale is ReentrancyHandling, Owned {
     ownerHasClaimedTokens = true;                                 // Block further mints from this method
   }
 
-  function LockTokens(address _contributor, uint256 _tokenAmount) public onlyOwner {
+  function LockTokens(address _contributor, uint256 _tokenAmount, uint _timeInterval) public onlyOwner {
     require(_contributor != 0x0);
     require(_tokenAmount > 0);
 
-    lockedTokensList[_contributor] = _tokenAmount;
+    lockedTokensList[_contributor] = LockData(_tokenAmount, now + _timeInterval);
   }
 
   function UnlockTokens() noReentrancy public {
     require(lockedTokensList[msg.sender] > 0);
 
-    // being super safe
-    uint256 tokens = lockedTokensList[msg.sender];
-    lockedTokensList[msg.sender] = 0;
+    // ensure lock-up period has expired before unlocking tokens
+    require(now >= lockedTokensList[msg.sender].period);
+
+    uint256 tokens = lockedTokensList[msg.sender].tokens;
+    lockedTokensList[msg.sender].tokens = 0;
     delete lockedTokensList[msg.sender];
 
     // Issue tokens
