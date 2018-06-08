@@ -13,10 +13,10 @@ contract HighVibeToken is Token {
 
 
   /* Initializes contract */
-  function HighVibeToken(address _crowdsaleAddress) public {
-    standard = "HighVibe Network";
-    name = "HighVibe Network Token";
-    symbol = "HighVibe"; // token symbol
+  constructor(address _crowdsaleAddress) public {
+    standard = "HighVibe";
+    name = "HighVibe";
+    symbol = "HV"; // token symbol
     decimals = 18;
     crowdsaleContractAddress = _crowdsaleAddress;
   }
@@ -65,7 +65,7 @@ contract HighVibeToken is Token {
         supply = supply.add(_amount);
         balances[_to] = balances[_to].add(_amount);
 
-        Issuance(_amount);
+        emit Issuance(_amount);
         Transfer(this, _to, _amount);
     }
 
@@ -83,7 +83,7 @@ contract HighVibeToken is Token {
         supply = supply.sub(_amount);
 
         Transfer(_from, this, _amount);
-        Destruction(_amount);
+        emit Destruction(_amount);
     }
 
     // ERC20 standard method overrides with some extra functionality

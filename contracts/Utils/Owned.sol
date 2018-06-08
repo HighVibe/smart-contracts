@@ -4,7 +4,7 @@ contract Owned {
     address public owner;
     address public newOwner;
 
-    function Owned() {
+    constructor() {
         owner = msg.sender;
     }
 
@@ -20,7 +20,7 @@ contract Owned {
 
     function acceptOwnership() public {
         require(msg.sender == newOwner);
-        OwnerUpdate(owner, newOwner);
+        emit OwnerUpdate(owner, newOwner);
         owner = newOwner;
         newOwner = 0x0;
     }
