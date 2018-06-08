@@ -354,7 +354,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
   }
 
   function UnlockTokens() noReentrancy public {
-    require(lockedTokensList[msg.sender] > 0);
+    require(lockedTokensList[msg.sender].tokens > 0);
 
     // ensure lock-up period has expired before unlocking tokens
     require(now >= lockedTokensList[msg.sender].period);
