@@ -30,9 +30,9 @@ contract('Check Transaction', function(accounts) {
 
 	it('Check Initial Crowdsale State', async function() {
 		crowdsale = await HighVibeCrowdsale.deployed();
-		let curr_state = await crowdsale.getCrowdsaleState();
+		let curr_state = await crowdsale.getState();
 		let expected_state = 1; // Pending Start
-		assert.equal(expected_state, curr_state, 'Checking Pending Start State');
+		assert.equal(expected_state, curr_state[2], 'Checking Pending Start State');
 	});
 
 	// it('Setting Crowdsale Dates', async function() {

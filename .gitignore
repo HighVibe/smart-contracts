@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 build/contracts/Crowdsale.json
 
 *.json
@@ -7,9 +5,5 @@ build/contracts/Crowdsale.json
 
 *.bin
 *.abi
-<<<<<<< HEAD
->>>>>>> master
-=======
 
-*.json
->>>>>>> master
+node_modules/

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.13;
+pragma solidity ^0.4.19;
 
 import "./Utils/ReentrancyHandling.sol";
 import "./Utils/Owned.sol";
