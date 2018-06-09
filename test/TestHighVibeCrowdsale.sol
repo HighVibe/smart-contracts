@@ -3,13 +3,13 @@ pragma solidity ^0.4.2;
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/HighVibeToken.sol";
-import "../contracts/HighVibeCrowdsale.sol";
+import "../contracts/TestCrowdsale.sol";
 
 contract TestHighVibeCrowdsale {
 
   function testBuyingTokens() {
     uint _expected = 1;
-    HighVibeCrowdsale _crowdsale = HighVibeCrowdsale(DeployedAddresses.HighVibeCrowdsale());
+    TestCrowdsale _crowdsale = TestCrowdsale(DeployedAddresses.TestCrowdsale());
 
     _crowdsale.send(1);
 

@@ -4,7 +4,7 @@ import "./Crowdsale.sol";
 
 contract TestCrowdsale is Crowdsale {
   constructor() public {
-    presaleDate = now + 15 minutes;
+    presaleDate = now;
     saleDate = presaleDate + 1 hours;
     endDate = saleDate + 1 hours;
 
