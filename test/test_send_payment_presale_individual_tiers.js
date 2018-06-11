@@ -199,7 +199,7 @@ contract('Check Transaction', function(accounts) {
 		console.log('total eth raised after second contribution: ', total_eth_raised);
 		console.log('post balance number: ', post_balance_number);
 
-		assert.equal(interpreted_tokens, 14.3, 'check tokens in 20% bonus tier')
+		assert.equal(interpreted_tokens, 14.3, 'check tokens in % bonus tier')
 	});
 })
 

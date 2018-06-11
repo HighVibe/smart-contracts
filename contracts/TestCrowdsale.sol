@@ -4,8 +4,8 @@ import "./Crowdsale.sol";
 
 contract TestCrowdsale is Crowdsale {
   constructor() public {
-    presaleDate = now;
-    saleDate = presaleDate + 1 hours;
+    presaleDate = now + 1 hours;
+    saleDate = now;
     endDate = saleDate + 1 hours;
 
     saleState = state.pendingStart;
