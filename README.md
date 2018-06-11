@@ -22,7 +22,7 @@ Telegram: https://t.me/highvibenetworktoken
 
 
 
-Goals/Event Periods
+Crowdsale Design
 =========================================================
 
 This ICO consists of 2 rounds: 
