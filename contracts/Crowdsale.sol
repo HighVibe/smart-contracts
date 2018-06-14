@@ -24,37 +24,27 @@ contract Crowdsale is ReentrancyHandling, Owned {
 
   mapping(address => LockData) public lockedTokensList;
 
-  enum state { pendingStart, presaleStart, saleStart, saleEnd }
+  enum state { pendingStart, saleStart, saleEnd }
   state saleState;
 
-  uint public presaleDate;
   uint public saleDate;
   uint public endDate;
 
-  event PresaleStarted(uint timestamp);
   event SaleStarted(uint timestamp);
   event SaleEnded(uint timestamp);
 
   IToken token = IToken(0x0);
   uint ethToTokenConversion;
 
-  uint256 maxPresaleCap;
-  uint256 maxPresaleWithoutBonus;
+  uint256 maxSaleCap;
+  uint256 maxSaleWithoutBonus;
   uint256 tier1;
   uint256 tier2;
   uint256 tier3;
-
-  uint256 maxSaleCap;
-  uint256 maxSaleWithoutBonus;
   uint256 tier4;
-  uint256 tier5;
-  uint256 tier6;
-  uint256 tier7;
 
 
   uint256 tokenSold = 0;
-  uint256 presaleTokenSold = 0;
-  uint256 presaleTokenWithoutBonusSold = 0;
   uint256 mainsaleTokenSold = 0;
   uint256 mainsaleTokenWithoutBonusSold = 0;
   uint256 public ethRaisedWithoutCompany = 0;
@@ -84,7 +74,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
 
     checkSaleState();                                           // Calibrate sale state
 
-    assert((saleState == state.presaleStart) || saleState == state.saleStart);
+    assert(saleState == state.saleStart);
     
     processTransaction(msg.sender, msg.value);                  // Process transaction and issue tokens
 
@@ -100,17 +90,14 @@ contract Crowdsale is ReentrancyHandling, Owned {
     if (saleState == state.pendingStart) {
       currentState = 1;
     }
-    else if (saleState == state.presaleStart) {
+    else if (saleState == state.saleStart) {
       currentState = 2;
     }
-    else if (saleState == state.saleStart) {
+    else if (saleState == state.saleEnd) {
       currentState = 3;
     }
-    else if (saleState == state.saleEnd) {
-      currentState = 4;
-    }
 
-    return (tokenSold, presaleTokenSold, currentState);
+    return (tokenSold, currentState);
   }
 
   //
@@ -123,100 +110,29 @@ contract Crowdsale is ReentrancyHandling, Owned {
         emit SaleEnded(now);
       }
     }
-    else if (now > saleDate) { // move into main sale round
+    else if (now > saleDate) { // move into public sale 
       if (saleState != state.saleStart) {
-        uint256 presaleTokenRemaining = maxPresaleCap.sub(presaleTokenSold);  // apply any remaining tokens from presale round to main sale round
-        maxSaleCap = maxSaleCap.add(presaleTokenRemaining);
         saleState = state.saleStart;  // change state
         emit SaleStarted(now);
       }
     }
-    else if (now > presaleDate) {
-      if (presaleTokenSold < maxPresaleCap) {
-        if (saleState != state.presaleStart) {
-          saleState = state.presaleStart;
-          emit PresaleStarted(now);
-        }
-      }
-      else {  // automatically start sale when all presale round tokens are sold out 
-        if (saleState != state.saleStart) {
-          saleState = state.saleStart;
-          emit SaleStarted(now);
-        }
-      }
-    }
   }
 
   //
   // Issue tokens and return if there is overflow
   //
-  function calculatePresale(uint256 _newContribution) internal returns (uint256, uint256) {
-    uint256 presaleEthAmount = 0;
-    uint256 presaleTokenAmount = 0;
-    
-    // presale round ONLY
-    if (saleState != state.presaleStart) {
-      return (presaleTokenAmount, presaleEthAmount);
-    }
-
-    presaleEthAmount = _newContribution;
-
-    // compute presale tokens without bonus
-    presaleTokenAmount = presaleEthAmount.mul(ethToTokenConversion);
-
-    uint256 availableTokenAmount = maxPresaleWithoutBonus.sub(presaleTokenWithoutBonusSold);
-
-    // verify presale tokens do not go over the max cap for presale round
-    if (presaleTokenAmount > availableTokenAmount) {
-      // cap the tokens to the max allowed for the presale round
-      presaleTokenAmount = availableTokenAmount;
-      // recalculate the corresponding ETH amount
-      presaleEthAmount = presaleTokenAmount.div(ethToTokenConversion);
-    }
-
-    // track tokens sold during presale round
-    presaleTokenWithoutBonusSold = presaleTokenWithoutBonusSold.add(presaleTokenAmount);
-
-    // compute bonus tokens
-    uint256 bonusTokenAmount = 0;
-
-    if (presaleTokenWithoutBonusSold > tier2 + tier1) {
-      bonusTokenAmount = presaleTokenAmount.mul(15);
-      bonusTokenAmount = bonusTokenAmount.div(100);
-    }
-    else if (presaleTokenWithoutBonusSold > tier1) {
-      bonusTokenAmount = presaleTokenAmount.mul(20);
-      bonusTokenAmount = bonusTokenAmount.div(100);
-    }
-    else {
-      bonusTokenAmount = presaleTokenAmount.mul(25);
-      bonusTokenAmount = bonusTokenAmount.div(100);
-    }
-
-    // add bonus to presale tokens
-    presaleTokenAmount = presaleTokenAmount.add(bonusTokenAmount);
-
-    // track tokens sold during presale round
-    presaleTokenSold = presaleTokenSold.add(presaleTokenAmount);
-
-    return (presaleTokenAmount, presaleEthAmount);
-  }
-
-  //
-  // Issue tokens and return if there is overflow
-  //
-  function calculateSale(uint256 _remainingContribution) internal returns (uint256, uint256) {
-    uint256 saleEthAmount = _remainingContribution;
+  function calculateSale(uint256 _newContribution) internal returns (uint256, uint256) {
+    uint256 saleEthAmount = _newContribution;
 
     // compute sale tokens without bonus
     uint256 saleTokenAmount = saleEthAmount.mul(ethToTokenConversion);
 
     // determine main sale tokens remaining
-    uint256 availableTokenAmount = maxSaleWithoutBonus.sub(mainsaleTokenWithoutBonusSold);
+    uint256 availableTokenAmount = maxSaleCap.sub(tokenSold);
 
-    // verify main sale tokens do not go over the max cap for main sale round
+    // verify sale tokens do not go over the max cap
     if (saleTokenAmount > availableTokenAmount) {
-      // cap the tokens to the max allowed for the main sale round
+      // cap the tokens to the max allowed 
       saleTokenAmount = availableTokenAmount;
 
       // recalculate the corresponding ETH amount
@@ -229,26 +145,30 @@ contract Crowdsale is ReentrancyHandling, Owned {
     // compute bonus tokens
     uint256 bonusTokenAmount = 0;
 
-    if (mainsaleTokenWithoutBonusSold > tier6 + tier5 + tier4) {
+    // tier 4
+    if (mainsaleTokenWithoutBonusSold > tier3 + tier2 + tier1) {
       bonusTokenAmount = 0;
     }
-    else if (mainsaleTokenWithoutBonusSold > tier5 + tier4) {
+    // tier 3
+    else if (mainsaleTokenWithoutBonusSold > tier2 + tier1) {
       bonusTokenAmount = saleTokenAmount.mul(5);
       bonusTokenAmount = bonusTokenAmount.div(100);
     }
-    else if (mainsaleTokenWithoutBonusSold > tier4) {
-      bonusTokenAmount = saleTokenAmount.mul(75);
-      bonusTokenAmount = bonusTokenAmount.div(1000);
-    }
-    else {
+    // tier 2
+    else if (mainsaleTokenWithoutBonusSold > tier1) {
       bonusTokenAmount = saleTokenAmount.mul(10);
+      bonusTokenAmount = bonusTokenAmount.div(100);
+    }
+    // tier 1
+    else {
+      bonusTokenAmount = saleTokenAmount.mul(15);
       bonusTokenAmount = bonusTokenAmount.div(100);
     }
 
     // add bonus to presale tokens
     saleTokenAmount = saleTokenAmount.add(bonusTokenAmount);
 
-    // track tokens sold during main sale round
+    // track tokens plus bonus sold during sale
     mainsaleTokenSold = mainsaleTokenSold.add(saleTokenAmount);
 
     return (saleTokenAmount, saleEthAmount);
@@ -258,15 +178,10 @@ contract Crowdsale is ReentrancyHandling, Owned {
   // Issue tokens and return if there is overflow
   //
   function processTransaction(address _contributor, uint256 _amount) internal {
-    uint256 newContribution = _amount;
+    uint256 tokenAmount = 0;
+    uint256 saleEthAmount = 0;
 
-    var (presaleTokenAmount, presaleEthAmount) = calculatePresale(newContribution);
-
-    // compute remaining ETH amount available for purchasing main sale tokens
-    var (saleTokenAmount, saleEthAmount) = calculateSale(newContribution.sub(presaleEthAmount));
-
-    // add up main sale + presale tokens
-    uint256 tokenAmount = saleTokenAmount.add(presaleTokenAmount);
+    (tokenAmount, saleEthAmount) = calculateSale(_amount);
 
     assert(tokenAmount > 0);
 
@@ -277,20 +192,19 @@ contract Crowdsale is ReentrancyHandling, Owned {
     contributorList[_contributor].tokensIssued = contributorList[_contributor].tokensIssued.add(tokenAmount);                
 
     // Add contribution amount to existing contributor
-    newContribution = saleEthAmount.add(presaleEthAmount);
-    contributorList[_contributor].contributionAmount = contributorList[_contributor].contributionAmount.add(newContribution);
+    contributorList[_contributor].contributionAmount = contributorList[_contributor].contributionAmount.add(saleEthAmount);
 
-    ethRaisedWithoutCompany = ethRaisedWithoutCompany.add(newContribution); // Add contribution amount to ETH raised
+    ethRaisedWithoutCompany = ethRaisedWithoutCompany.add(saleEthAmount); // Add contribution amount to ETH raised
     tokenSold = tokenSold.add(tokenAmount);         // track how many tokens are sold
 
     // compute any refund if applicable
-    uint256 refundAmount = _amount.sub(newContribution);
+    uint256 refundAmount = _amount.sub(saleEthAmount);
 
     if (refundAmount > 0) {
       _contributor.transfer(refundAmount);          // refund contributor amount behind the maximum ETH cap
     }
 
-    companyAddress.transfer(newContribution);       // send ETH to company
+    companyAddress.transfer(saleEthAmount);       // send ETH to company
   }
 
   //
