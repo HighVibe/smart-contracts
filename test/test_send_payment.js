@@ -64,14 +64,17 @@ contract('Check Transaction', function(accounts) {
 		console.log('initial balance number: ', initial_balance_number);
 
 		let value = web3.toWei(1, "ether"); // 1 eth
+
+		let ts = await testCrowd.tokenSold;
 		
 
 		console.log('address: ', testCrowd.address);
 		let initial_hv = await hv.balanceOf(account1);
-		let initial_hv_number = new web3.BigNumber(initial_hv).toString();
+		// let initial_hv_number = new web3.BigNumber(initial_hv);
 		console.log('token balance: ', initial_hv);
-		console.log('token balance number: ', initial_hv_number);
+		// console.log('token balance number: ', initial_hv_number);
 		console.log("amount of ether being sent: ", value);
+		console.log('amount of tokens sold: ', ts)
 
 		web3.eth.sendTransaction({
 			from: account1,
@@ -103,104 +106,153 @@ contract('Check Transaction', function(accounts) {
 		assert.equal(interpreted_tokens, 1.15, 'check 15% bonus tier')
 	});
 
-	// it('Sending Payment to Crowdsale during Pre-Sale Round Tier 2', async function() {
+	it('Sending Payment to Crowdsale Tier 2', async function() {
 
-	// 	// Create a HighVibeToken instance with the HighVibeCrowdsale address
-	// 	// console.log('crowdsale address: ', crowdsale.address);
-	// 	let expected_address = await hv.crowdsaleContractAddress();
-	// 	assert.equal(expected_address, testCrowd.address, 'check Crowdsale contract address');
+		// Create a HighVibeToken instance with the HighVibeCrowdsale address
+		// console.log('crowdsale address: ', crowdsale.address);
+		let expected_address = await hv.crowdsaleContractAddress();
+		assert.equal(expected_address, testCrowd.address, 'check Crowdsale contract address');
 
 
-	// 	// Set Token on TestCrowdsale
-	// 	await testCrowd.setToken(HighVibeToken.address);
-	// 	let tokenAddress = await testCrowd.getToken();
-	// 	assert.equal(HighVibeToken.address, tokenAddress, 'check set token');
+		// Set Token on TestCrowdsale
+		await testCrowd.setToken(HighVibeToken.address);
+		let tokenAddress = await testCrowd.getToken();
+		assert.equal(HighVibeToken.address, tokenAddress, 'check set token');
 
-	// 	//send payment
-	// 	let value = web3.toWei(4, "ether"); // 1 eth
+		//send payment
+		let value = web3.toWei(1, "ether"); // 1 eth
 		
-	// 	console.log('address: ', testCrowd.address);
-	// 	let initial_hv = await hv.balanceOf(account1);
-	// 	let initial_hv_number = new web3.BigNumber(initial_hv).toString();
-	// 	console.log('token balance: ', initial_hv);
-	// 	console.log('token balance number: ', initial_hv_number);
+		console.log('address: ', testCrowd.address);
+		let initial_hv = await hv.balanceOf(account1);
+		// let initial_hv_number = new web3.BigNumber(initial_hv).toString();
+		console.log('token balance: ', initial_hv);
+		// console.log('token balance number: ', initial_hv_number);
 
-	// 	web3.eth.sendTransaction({
-	// 		from: account1,
-	// 		to: testCrowd.address,
-	// 		value: value,
-	// 		gas: 4500000 //4,500,000
-	// 	});
+		web3.eth.sendTransaction({
+			from: account1,
+			to: testCrowd.address,
+			value: value,
+			gas: 4500000 //4,500,000
+		});
 
-	// 	let post_balance = await web3.eth.getBalance(account1);
-	// 	let post_balance_number = new web3.BigNumber(post_balance).toString();
+		let post_balance = await web3.eth.getBalance(account1);
+		let post_balance_number = new web3.BigNumber(post_balance).toString();
 
-	// 	let total_eth_raised = await testCrowd.ethRaisedWithoutCompany();
-
-
-	// 	let contributor = account1.toString();
-	// 	let tokens_owed_to_contributor = await testCrowd.contributorList(contributor);
-	// 	let tokens_owed_to_contributor_number = new web3.BigNumber(tokens_owed_to_contributor[1]).toNumber();
-	// 	let interpreted_tokens = interpretNumber(tokens_owed_to_contributor_number)
-
-	// 	console.log("check balance of tokens owed to contributor, ", tokens_owed_to_contributor)
-	// 	console.log("check balance of tokens owed to contributor number, ", interpreted_tokens);
-	// 	console.log('test post_balance: ', big2Number(await web3.eth.getBalance(account1)));
-	// 	console.log('post balance: ', post_balance);
-	// 	console.log('total eth raised after second contribution: ', total_eth_raised);
-	// 	console.log('post balance number: ', post_balance_number);
-
-	// 	assert.equal(interpreted_tokens, 8.55, 'check tokens in 20% bonus tier')
-	// });
-
-	// it('Sending Payment to Crowdsale during Pre-Sale Round Tier 3', async function() {
-
-	// 	// Create a HighVibeToken instance with the TestCrowdsale address
-	// 	let expected_address = await hv.crowdsaleContractAddress();
-	// 	assert.equal(expected_address, testCrowd.address, 'check Crowdsale contract address');
+		let total_eth_raised = await testCrowd.ethRaisedWithoutCompany();
 
 
-	// 	// Set Token on TestCrowdsale
-	// 	await testCrowd.setToken(HighVibeToken.address);
-	// 	let tokenAddress = await testCrowd.getToken();
-	// 	assert.equal(HighVibeToken.address, tokenAddress, 'check set token');
+		let contributor = account1.toString();
+		let tokens_owed_to_contributor = await testCrowd.contributorList(contributor);
+		let tokens_owed_to_contributor_number = new web3.BigNumber(tokens_owed_to_contributor[1]).toNumber();
+		let interpreted_tokens = interpretNumber(tokens_owed_to_contributor_number)
 
-	// 	//send payment
-	// 	let value = web3.toWei(5, "ether"); // 1 eth
+		console.log("check balance of tokens owed to contributor, ", tokens_owed_to_contributor)
+		console.log("check balance of tokens owed to contributor number, ", interpreted_tokens);
+		console.log('test post_balance: ', big2Number(await web3.eth.getBalance(account1)));
+		console.log('post balance: ', post_balance);
+		console.log('total eth raised after second contribution: ', total_eth_raised);
+		console.log('post balance number: ', post_balance_number);
+
+		assert.equal(interpreted_tokens, 2.25, 'check tokens in 20% bonus tier')
+	});
+
+	it('Sending Payment to Crowdsale during Pre-Sale Round Tier 3', async function() {
+
+		// Create a HighVibeToken instance with the TestCrowdsale address
+		let expected_address = await hv.crowdsaleContractAddress();
+		assert.equal(expected_address, testCrowd.address, 'check Crowdsale contract address');
+
+
+		// Set Token on TestCrowdsale
+		await testCrowd.setToken(HighVibeToken.address);
+		let tokenAddress = await testCrowd.getToken();
+		assert.equal(HighVibeToken.address, tokenAddress, 'check set token');
+
+		//send payment
+		let value = web3.toWei(1, "ether"); // 1 eth
 		
-	// 	console.log('address: ', testCrowd.address);
-	// 	let initial_hv = await hv.balanceOf(account1);
-	// 	let initial_hv_number = new web3.BigNumber(initial_hv).toString();
-	// 	console.log('token balance: ', initial_hv);
-	// 	console.log('token balance number: ', initial_hv_number);
+		console.log('address: ', testCrowd.address);
+		let initial_hv = await hv.balanceOf(account1);
+		// let initial_hv_number = new web3.BigNumber(initial_hv).toString();
+		console.log('token balance: ', initial_hv);
+		// console.log('token balance number: ', initial_hv_number);
 
-	// 	web3.eth.sendTransaction({
-	// 		from: account1,
-	// 		to: testCrowd.address,
-	// 		value: value,
-	// 		gas: 4500000 //4,500,000
-	// 	});
+		web3.eth.sendTransaction({
+			from: account1,
+			to: testCrowd.address,
+			value: value,
+			gas: 4500000 //4,500,000
+		});
 
-	// 	let post_balance = await web3.eth.getBalance(account1);
-	// 	let post_balance_number = new web3.BigNumber(post_balance).toString();
+		let post_balance = await web3.eth.getBalance(account1);
+		let post_balance_number = new web3.BigNumber(post_balance).toString();
 
-	// 	let total_eth_raised = await testCrowd.ethRaisedWithoutCompany();
+		let total_eth_raised = await testCrowd.ethRaisedWithoutCompany();
 
 
-	// 	let contributor = account1.toString();
-	// 	let tokens_owed_to_contributor = await testCrowd.contributorList(contributor);
-	// 	let tokens_owed_to_contributor_number = new web3.BigNumber(tokens_owed_to_contributor[1]).toNumber();
-	// 	let interpreted_tokens = interpretNumber(tokens_owed_to_contributor_number)
+		let contributor = account1.toString();
+		let tokens_owed_to_contributor = await testCrowd.contributorList(contributor);
+		let tokens_owed_to_contributor_number = new web3.BigNumber(tokens_owed_to_contributor[1]).toNumber();
+		let interpreted_tokens = interpretNumber(tokens_owed_to_contributor_number)
 
-	// 	console.log("check balance of tokens owed to contributor, ", tokens_owed_to_contributor)
-	// 	console.log("check balance of tokens owed to contributor number, ", interpreted_tokens);
-	// 	console.log('test post_balance: ', big2Number(await web3.eth.getBalance(account1)));
-	// 	console.log('post balance: ', post_balance);
-	// 	console.log('total eth raised after second contribution: ', total_eth_raised);
-	// 	console.log('post balance number: ', post_balance_number);
+		console.log("check balance of tokens owed to contributor, ", tokens_owed_to_contributor)
+		console.log("check balance of tokens owed to contributor number, ", interpreted_tokens);
+		console.log('test post_balance: ', big2Number(await web3.eth.getBalance(account1)));
+		console.log('post balance: ', post_balance);
+		console.log('total eth raised after second contribution: ', total_eth_raised);
+		console.log('post balance number: ', post_balance_number);
 
-	// 	assert.equal(interpreted_tokens, 14.3, 'check tokens in % bonus tier')
-	// });
+		assert.equal(interpreted_tokens, 3.3, 'check tokens in % bonus tier')
+	});
+
+	it('Sending Payment to Crowdsale Tier 4', async function() {
+
+		// Create a HighVibeToken instance with the TestCrowdsale address
+		let expected_address = await hv.crowdsaleContractAddress();
+		assert.equal(expected_address, testCrowd.address, 'check Crowdsale contract address');
+
+
+		// Set Token on TestCrowdsale
+		await testCrowd.setToken(HighVibeToken.address);
+		let tokenAddress = await testCrowd.getToken();
+		assert.equal(HighVibeToken.address, tokenAddress, 'check set token');
+
+		//send payment
+		let value = web3.toWei(1, "ether"); // 1 eth
+		
+		console.log('address: ', testCrowd.address);
+		let initial_hv = await hv.balanceOf(account1);
+		// let initial_hv_number = new web3.BigNumber(initial_hv).toString();
+		console.log('token balance: ', initial_hv);
+		// console.log('token balance number: ', initial_hv_number);
+
+		web3.eth.sendTransaction({
+			from: account1,
+			to: testCrowd.address,
+			value: value,
+			gas: 4500000 //4,500,000
+		});
+
+		let post_balance = await web3.eth.getBalance(account1);
+		let post_balance_number = new web3.BigNumber(post_balance).toString();
+
+		let total_eth_raised = await testCrowd.ethRaisedWithoutCompany();
+
+
+		let contributor = account1.toString();
+		let tokens_owed_to_contributor = await testCrowd.contributorList(contributor);
+		let tokens_owed_to_contributor_number = new web3.BigNumber(tokens_owed_to_contributor[1]).toNumber();
+		let interpreted_tokens = interpretNumber(tokens_owed_to_contributor_number)
+
+		console.log("check balance of tokens owed to contributor, ", tokens_owed_to_contributor)
+		console.log("check balance of tokens owed to contributor number, ", interpreted_tokens);
+		console.log('test post_balance: ', big2Number(await web3.eth.getBalance(account1)));
+		console.log('post balance: ', post_balance);
+		console.log('total eth raised after second contribution: ', total_eth_raised);
+		console.log('post balance number: ', post_balance_number);
+
+		assert.equal(interpreted_tokens, 4.3, 'check tokens in % bonus tier')
+	});
 })
 
 function big2Number(bigNumber) {
