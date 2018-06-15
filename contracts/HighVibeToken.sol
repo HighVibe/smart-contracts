@@ -66,7 +66,7 @@ contract HighVibeToken is Token {
         balances[_to] = balances[_to].add(_amount);
 
         emit Issuance(_amount);
-        Transfer(this, _to, _amount);
+        emit Transfer(this, _to, _amount);
     }
 
     /**
@@ -82,7 +82,7 @@ contract HighVibeToken is Token {
         balances[_from] = balances[_from].sub(_amount);
         supply = supply.sub(_amount);
 
-        Transfer(_from, this, _amount);
+        emit Transfer(_from, this, _amount);
         emit Destruction(_amount);
     }
 

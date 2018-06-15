@@ -33,17 +33,17 @@ contract Token is IERC20Token, Owned {
   }
 
   /* Returns total supply of issued tokens */
-  function totalSupply() view returns (uint256) {
+  function totalSupply() public returns (uint256) {
     return supply;
   }
 
   /* Returns balance of address */
-  function balanceOf(address _owner) view returns (uint256 balance) {
+  function balanceOf(address _owner) public returns (uint256 balance) {
     return balances[_owner];
   }
 
   /* Transfers tokens from your address to other */
-  function transfer(address _to, uint256 _value) returns (bool success) {
+  function transfer(address _to, uint256 _value) public returns (bool success) {
     require(_to != 0x0 && _to != address(this));
     balances[msg.sender] = balances[msg.sender].sub(_value); // Deduct senders balance
     balances[_to] = balances[_to].add(_value);               // Add recivers blaance
@@ -52,14 +52,14 @@ contract Token is IERC20Token, Owned {
   }
 
   /* Approve other address to spend tokens on your account */
-  function approve(address _spender, uint256 _value) returns (bool success) {
+  function approve(address _spender, uint256 _value) public returns (bool success) {
     allowances[msg.sender][_spender] = _value;        // Set allowance
     emit Approval(msg.sender, _spender, _value);           // Raise Approval event
     return true;
   }
 
   /* Approve and then communicate the approved contract in a single tx */
-  function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
     ItokenRecipient spender = ItokenRecipient(_spender);            // Cast spender to tokenRecipient contract
     approve(_spender, _value);                                      // Set approval to contract for _value
     spender.receiveApproval(msg.sender, _value, this, _extraData);  // Raise method on _spender contract
@@ -67,7 +67,7 @@ contract Token is IERC20Token, Owned {
   }
 
   /* A contract attempts to get the coins */
-  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
     require(_to != 0x0 && _to != address(this));
     balances[_from] = balances[_from].sub(_value);                              // Deduct senders balance
     balances[_to] = balances[_to].add(_value);                                  // Add recipient blaance
@@ -76,7 +76,7 @@ contract Token is IERC20Token, Owned {
     return true;
   }
 
-  function allowance(address _owner, address _spender) view returns (uint256 remaining) {
+  function allowance(address _owner, address _spender) public returns (uint256 remaining) {
     return allowances[_owner][_spender];
   }
 

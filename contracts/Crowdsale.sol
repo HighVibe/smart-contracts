@@ -36,8 +36,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
   IToken token = IToken(0x0);
   uint ethToTokenConversion;
 
-  uint256 maxSaleCap;
-  uint256 maxSaleWithoutBonus;
+  uint256 maxSaleWithoutBonusCap;
   uint256 tier1;
   uint256 tier2;
   uint256 tier3;
@@ -45,8 +44,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
 
 
   uint256 tokenSold = 0;
-  uint256 mainsaleTokenSold = 0;
-  uint256 mainsaleTokenWithoutBonusSold = 0;
+  uint256 tokensWithoutBonusSold = 0;
   uint256 public ethRaisedWithoutCompany = 0;
 
   address companyAddress;   // company wallet address in cold/hardware storage 
@@ -84,7 +82,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
   // 
   // return state of smart contract
   //
-  function getState() public constant returns (uint256, uint256, uint) {
+  function getState() public constant returns (uint256, uint) {
     uint currentState = 0;
 
     if (saleState == state.pendingStart) {
@@ -128,7 +126,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
     uint256 saleTokenAmount = saleEthAmount.mul(ethToTokenConversion);
 
     // determine main sale tokens remaining
-    uint256 availableTokenAmount = maxSaleCap.sub(tokenSold);
+    uint256 availableTokenAmount = maxSaleWithoutBonusCap.sub(tokenSold);
 
     // verify sale tokens do not go over the max cap
     if (saleTokenAmount > availableTokenAmount) {
@@ -140,22 +138,22 @@ contract Crowdsale is ReentrancyHandling, Owned {
     }
 
     // track tokens sold during main sale round
-    mainsaleTokenWithoutBonusSold = mainsaleTokenWithoutBonusSold.add(saleTokenAmount);
+    tokensWithoutBonusSold = tokensWithoutBonusSold.add(saleTokenAmount);
 
     // compute bonus tokens
     uint256 bonusTokenAmount = 0;
 
     // tier 4
-    if (mainsaleTokenWithoutBonusSold > tier3 + tier2 + tier1) {
+    if (tokensWithoutBonusSold > tier3 + tier2 + tier1) {
       bonusTokenAmount = 0;
     }
     // tier 3
-    else if (mainsaleTokenWithoutBonusSold > tier2 + tier1) {
+    else if (tokensWithoutBonusSold > tier2 + tier1) {
       bonusTokenAmount = saleTokenAmount.mul(5);
       bonusTokenAmount = bonusTokenAmount.div(100);
     }
     // tier 2
-    else if (mainsaleTokenWithoutBonusSold > tier1) {
+    else if (tokensWithoutBonusSold > tier1) {
       bonusTokenAmount = saleTokenAmount.mul(10);
       bonusTokenAmount = bonusTokenAmount.div(100);
     }
@@ -167,9 +165,6 @@ contract Crowdsale is ReentrancyHandling, Owned {
 
     // add bonus to presale tokens
     saleTokenAmount = saleTokenAmount.add(bonusTokenAmount);
-
-    // track tokens plus bonus sold during sale
-    mainsaleTokenSold = mainsaleTokenSold.add(saleTokenAmount);
 
     return (saleTokenAmount, saleEthAmount);
   }
