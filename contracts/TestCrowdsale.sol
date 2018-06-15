@@ -3,6 +3,10 @@ pragma solidity ^0.4.13;
 import "./Crowdsale.sol";
 
 contract TestCrowdsale is Crowdsale {
+    string public website;
+    string public medium;
+    string public telegram;
+
   constructor() public {
     saleDate = now;
     endDate = saleDate + 1 hours;

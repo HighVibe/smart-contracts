@@ -82,8 +82,8 @@ contract Crowdsale is ReentrancyHandling, Owned {
   // 
   // return state of smart contract
   //
-  function getState() public constant returns (uint256, uint) {
-    uint currentState = 0;
+  function getState() public constant returns (uint256, uint256) {
+    uint256 currentState = 0;
 
     if (saleState == state.pendingStart) {
       currentState = 1;
