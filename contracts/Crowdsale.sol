@@ -259,7 +259,13 @@ contract Crowdsale is ReentrancyHandling, Owned {
     require(_contributor != 0x0);
     require(_tokenAmount > 0);
 
-    lockedTokensList[_contributor] = LockData(_tokenAmount, now + _timeInterval);
+    if (0 > lockedTokensList[_contributor].tokens) {
+      lockedTokensList[_contributor].tokens += _tokenAmount;
+      lockedTokensList[_contributor].period = _timeInterval;
+    }
+    else {
+      lockedTokensList[_contributor] = LockData(_tokenAmount, now + _timeInterval);
+    }
   }
 
   function UnlockTokens() noReentrancy public {
