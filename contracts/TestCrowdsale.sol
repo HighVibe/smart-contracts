@@ -22,10 +22,10 @@ contract TestCrowdsale is Crowdsale {
     // tokens available for purchase: 1,119,311,124
     // bonus tokens: 80,688,876
     maxSaleWithoutBonusCap = 1119311124 ether;    
-    tier1 = 260869565 ether;                      // allocated tokens for this tier (bonus tokens not included)
-    tier2 = 272727273 ether;                      // allocated tokens for this tier (bonus tokens not included)
-    tier3 = 285714286 ether;                      // allocated tokens for this tier (bonus tokens not included)
+    tier1 = 1 ether;                      // allocated tokens for this tier (bonus tokens not included)
+    tier2 = 1 ether;                      // allocated tokens for this tier (bonus tokens not included)
+    tier3 = 1 ether;                      // allocated tokens for this tier (bonus tokens not included)
 
-    tier4 = 300000000 ether;                      // allocated tokens for this tier (bonus tokens not included)
+    tier4 = 1 ether;                      // allocated tokens for this tier (bonus tokens not included)
   }
 }
