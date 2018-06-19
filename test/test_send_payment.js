@@ -253,6 +253,67 @@ contract('Check Transaction', function(accounts) {
 
 		assert.equal(interpreted_tokens, 4.3, 'check tokens in % bonus tier')
 	});
+
+	it('Crowdsale state changes to closed after all tokens are sold', async function() {
+		let expected_address = await hv.crowdsaleContractAddress();
+		assert.equal(expected_address, testCrowd.address, 'check Crowdsale contract address');
+
+
+		// Set Token on TestCrowdsale
+		await testCrowd.setToken(HighVibeToken.address);
+		let tokenAddress = await testCrowd.getToken();
+		assert.equal(HighVibeToken.address, tokenAddress, 'check set token');
+
+
+
+		let tokens_sold = await testCrowd.tokenSold;
+		console.log('Total tokens sold: ', tokens_sold);
+
+		let max_token_supply = await testCrowd.maxTokenSupply;
+		console.log('Max supply: ', max_token_supply);
+
+    await timeTravel(86400 * 3) //3 days later
+    // await mineBlock() // workaround for https://github.com/ethereumjs/testrpc/issues/336
+		// let status = await testCrowd.getState();
+		
+		console.log("Current time: ", web3.eth.getBlock(web3.eth.blockNumber).timestamp)
+
+			//send payment
+			let value = web3.toWei(5, "ether"); // 1 eth
+		
+			console.log('address: ', testCrowd.address);
+			let initial_hv = await hv.balanceOf(account1);
+			// let initial_hv_number = new web3.BigNumber(initial_hv).toString();
+			console.log('token balance: ', initial_hv);
+			// console.log('token balance number: ', initial_hv_number);
+		
+			web3.eth.sendTransaction({
+				from: account1,
+				to: testCrowd.address,
+				value: value,
+				gas: 4500000 //4,500,000
+			});
+
+		testCrowd = await TestCrowdsale.deployed();
+		let curr_state = await testCrowd.getState();
+		let expected_state = 3; // Pending Start
+		assert.equal(expected_state, curr_state[1].c[0], 'Checking Pending Start State');
+	});
+
+	// it('Crowdsale state changes to closed after all tokens are sold', async function() {
+
+	// 	// Create a HighVibeToken instance with the HighVibeCrowdsale address
+	// 	// console.log('crowdsale address: ', crowdsale.address);
+	// 	let expected_address = await hv.crowdsaleContractAddress();
+	// 	assert.equal(expected_address, testCrowd.address, 'check Crowdsale contract address');
+
+
+	// 	// Set Token on TestCrowdsale
+	// 	await testCrowd.setToken(HighVibeToken.address);
+	// 	let tokenAddress = await testCrowd.getToken();
+	// 	assert.equal(HighVibeToken.address, tokenAddress, 'check set token');
+
+	// })
 })
 
 function big2Number(bigNumber) {
@@ -262,4 +323,18 @@ function big2Number(bigNumber) {
 
 function interpretNumber(num) {
 	return num / 10 ** 18
+}
+
+const timeTravel = function (time) {
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.sendAsync({
+      jsonrpc: "2.0",
+      method: "evm_increaseTime",
+      params: [time], // 86400 is num seconds in day
+      id: new Date().getTime()
+    }, (err, result) => {
+      if(err){ return reject(err) }
+      return resolve(result)
+    });
+  })
 }
