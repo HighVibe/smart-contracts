@@ -72,7 +72,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
 
     checkSaleState();                                           // Calibrate sale state
 
-    assert(saleState == state.saleStart);
+    require(saleState == state.saleStart);
     
     processTransaction(msg.sender, msg.value);                  // Process transaction and issue tokens
 
