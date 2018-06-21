@@ -14,7 +14,7 @@ One-pager: https://www.highvibe.network/wp-content/uploads/2018/06/HighVibe.Netw
 
 Infographic: https://goo.gl/5zHTJj
 
-Whitepaper: Coming Soon
+Whitepaper: https://s3.us-east-2.amazonaws.com/highvibenetwork/HighVibe.Network+Whitepaper+v0.51.pdf
 
 Medium: https://medium.com/highvibe-network
 
