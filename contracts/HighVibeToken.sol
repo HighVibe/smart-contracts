@@ -13,17 +13,20 @@ contract HighVibeToken is Token {
 
 
   /* Initializes contract */
-  constructor(address _crowdsaleAddress) public {
+  constructor() public {
     standard = "HighVibe";
     name = "HighVibe";
     symbol = "HV"; // token symbol
     decimals = 18;
+  }
+
+  function setCrowdsale(address _crowdsaleAddress) public onlyOwner {
     crowdsaleContractAddress = _crowdsaleAddress;
   }
 
     // validates an address - currently only checks that it isn't null
     modifier validAddress(address _address) {
-        require(_address != 0x0);
+        require(_address != address(0));
         _;
     }
 
@@ -35,7 +38,7 @@ contract HighVibeToken is Token {
 
     // allows execution only when transfers aren't disabled
     modifier transfersAllowed {
-        assert(transfersEnabled);
+        require(transfersEnabled);
         _;
     }
 
@@ -78,6 +81,7 @@ contract HighVibeToken is Token {
     */
     function destroy(address _from, uint256 _amount) public {
         require(msg.sender == _from || msg.sender == owner); // validate input
+        require(balances[_from] >= _amount);
 
         balances[_from] = balances[_from].sub(_amount);
         supply = supply.sub(_amount);
@@ -99,7 +103,7 @@ contract HighVibeToken is Token {
         @return true if the transfer was successful, false if it wasn't
     */
     function transfer(address _to, uint256 _value) public transfersAllowed returns (bool success) {
-        assert(super.transfer(_to, _value));
+        require(super.transfer(_to, _value));
         return true;
     }
   
@@ -107,7 +111,7 @@ contract HighVibeToken is Token {
         require(_recipients.length == _values.length); // Check if input data is correct
 
         for (uint cnt = 0; cnt < _recipients.length; cnt++) {
-            assert(super.transfer(_recipients[cnt], _values[cnt]));
+            require(super.transfer(_recipients[cnt], _values[cnt]));
         }
         return true;
     }
@@ -124,7 +128,7 @@ contract HighVibeToken is Token {
         @return true if the transfer was successful, false if it wasn't
     */
     function transferFrom(address _from, address _to, uint256 _value) public transfersAllowed returns (bool success) {
-        assert(super.transferFrom(_from, _to, _value));
+        require(super.transferFrom(_from, _to, _value));
         return true;
     }
 }

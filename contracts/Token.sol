@@ -44,10 +44,12 @@ contract Token is IERC20Token, Owned {
 
   /* Transfers tokens from your address to other */
   function transfer(address _to, uint256 _value) public returns (bool success) {
-    require(_to != 0x0 && _to != address(this));
+    require(_to != address(0) && _to != address(this));
+    require(balances[msg.sender] >= _value);
+
     balances[msg.sender] = balances[msg.sender].sub(_value); // Deduct senders balance
     balances[_to] = balances[_to].add(_value);               // Add recivers blaance
-    emit Transfer(msg.sender, _to, _value);                       // Raise Transfer event
+    emit Transfer(msg.sender, _to, _value);                  // Raise Transfer event
     return true;
   }
 
@@ -68,7 +70,9 @@ contract Token is IERC20Token, Owned {
 
   /* A contract attempts to get the coins */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
-    require(_to != 0x0 && _to != address(this));
+    require(_to != address(0) && _to != address(this));
+    require(balances[_from] >= _value);
+
     balances[_from] = balances[_from].sub(_value);                              // Deduct senders balance
     balances[_to] = balances[_to].add(_value);                                  // Add recipient blaance
     allowances[_from][msg.sender] = allowances[_from][msg.sender].sub(_value);  // Deduct allowance for this address

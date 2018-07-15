@@ -33,19 +33,19 @@ contract Crowdsale is ReentrancyHandling, Owned {
   event SaleStarted(uint timestamp);
   event SaleEnded(uint timestamp);
 
-  IToken token = IToken(0x0);
-  uint ethToTokenConversion;
+  IToken public token = IToken(address(0));
+  uint internal ethToTokenConversion;
 
-  uint256 maxSaleWithoutBonusCap;
-  uint256 tier1;
-  uint256 tier2;
-  uint256 tier3;
-  uint256 tier4;
+  uint256 internal maxSaleWithoutBonusCap;
+  uint256 internal tier1;
+  uint256 internal tier2;
+  uint256 internal tier3;
+  uint256 internal tier4;
 
 
-  uint256 tokenSold = 0;
-  uint256 tokensWithoutBonusSold = 0;
-  uint256 public ethRaisedWithoutCompany = 0;
+  uint256 public tokenSold = 0;
+  uint256 internal tokensWithoutBonusSold = 0;
+  uint256 internal ethRaisedWithoutCompany = 0;
 
   address companyAddress;   // company wallet address in cold/hardware storage 
 
@@ -67,8 +67,8 @@ contract Crowdsale is ReentrancyHandling, Owned {
   //
   function() public noReentrancy onlyLowGasPrice payable {
     require(msg.value != 0);                                    // Throw if value is 0
-    require(companyAddress != 0x0);
-    require(token != IToken(0x0));
+    require(companyAddress != address(0));
+    require(token != IToken(address(0)));
 
     checkSaleState();                                           // Calibrate sale state
 
@@ -178,7 +178,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
 
     (tokenAmount, saleEthAmount) = calculateSale(_amount);
 
-    assert(tokenAmount > 0);
+    require(tokenAmount > 0);
 
     // Issue new tokens
     token.mintTokens(_contributor, tokenAmount);                              
@@ -234,7 +234,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
   //
   function claimCompanyTokens() public onlyOwner {
     require(!ownerHasClaimedCompanyTokens);                     // Check if owner has already claimed tokens
-    require(companyAddress != 0x0);
+    require(companyAddress != address(0));
     
     tokenSold = tokenSold.add(companyTokens); 
     token.mintTokens(companyAddress, companyTokens);            // Issue company tokens 
@@ -248,7 +248,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
     checkSaleState();                                             // Calibrate sale state
     require(saleState == state.saleEnd);                          // Check sale has ended
     require(!ownerHasClaimedTokens);                              // Check if owner has already claimed tokens
-    require(companyAddress != 0x0);
+    require(companyAddress != address(0));
 
     uint256 remainingTokens = maxTokenSupply.sub(token.totalSupply());
     token.mintTokens(companyAddress, remainingTokens);            // Issue tokens to company
@@ -256,7 +256,7 @@ contract Crowdsale is ReentrancyHandling, Owned {
   }
 
   function LockTokens(address _contributor, uint256 _tokenAmount, uint _timeInterval) public onlyOwner {
-    require(_contributor != 0x0);
+    require(_contributor != address(0));
     require(_tokenAmount > 0);
 
     if (0 > lockedTokensList[_contributor].tokens) {
