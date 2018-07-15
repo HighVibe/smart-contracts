@@ -1,7 +1,7 @@
-HighVibe.Network Crowdsale
+HighVibe.Network Public Sale
 ========================================================
 
-This respository contains smart contracts for the crowdsale of HighVibe.Network tokens.
+This respository contains smart contracts for the public sale of HighVibe.Network (HV) tokens.
 
 
 
