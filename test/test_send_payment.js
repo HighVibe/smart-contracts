@@ -278,21 +278,8 @@ contract('Check Transaction', function(accounts) {
 		
 		console.log("Current time: ", web3.eth.getBlock(web3.eth.blockNumber).timestamp)
 
-			//send payment
-			let value = web3.toWei(5, "ether"); // 1 eth
-		
-			console.log('address: ', testCrowd.address);
-			let initial_hv = await hv.balanceOf(account1);
-			// let initial_hv_number = new web3.BigNumber(initial_hv).toString();
-			console.log('token balance: ', initial_hv);
-			// console.log('token balance number: ', initial_hv_number);
-		
-			web3.eth.sendTransaction({
-				from: account1,
-				to: testCrowd.address,
-				value: value,
-				gas: 4500000 //4,500,000
-			});
+
+		let state_changer = await testCrowd.claimRemainingTokens();
 
 		testCrowd = await TestCrowdsale.deployed();
 		let curr_state = await testCrowd.getState();
@@ -300,20 +287,23 @@ contract('Check Transaction', function(accounts) {
 		assert.equal(expected_state, curr_state[1].c[0], 'Checking Pending Start State');
 	});
 
-	// it('Crowdsale state changes to closed after all tokens are sold', async function() {
+	it('Account recieves tokens after crowdsale is complete', async function() {
 
-	// 	// Create a HighVibeToken instance with the HighVibeCrowdsale address
-	// 	// console.log('crowdsale address: ', crowdsale.address);
-	// 	let expected_address = await hv.crowdsaleContractAddress();
-	// 	assert.equal(expected_address, testCrowd.address, 'check Crowdsale contract address');
+		// Create a HighVibeToken instance with the HighVibeCrowdsale address
+		// console.log('crowdsale address: ', crowdsale.address);
+		let expected_address = await hv.crowdsaleContractAddress();
+		assert.equal(expected_address, testCrowd.address, 'check Crowdsale contract address');
 
 
-	// 	// Set Token on TestCrowdsale
-	// 	await testCrowd.setToken(HighVibeToken.address);
-	// 	let tokenAddress = await testCrowd.getToken();
-	// 	assert.equal(HighVibeToken.address, tokenAddress, 'check set token');
+		// Set Token on TestCrowdsale
+		await testCrowd.setToken(HighVibeToken.address);
+		let tokenAddress = await testCrowd.getToken();
+		assert.equal(HighVibeToken.address, tokenAddress, 'check set token');
 
-	// })
+		let check_unlock = await testCrowd.UnlockTokens();
+		
+
+	})
 })
 
 function big2Number(bigNumber) {
