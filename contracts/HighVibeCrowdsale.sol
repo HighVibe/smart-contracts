@@ -12,7 +12,7 @@ contract HighVibeCrowdsale is Crowdsale {
     medium = "https://www.medium.com/highvibe-network/";
     telegram = "https://t.me/highvibenetworktoken";
 
-    saleDate = 1530932400;         // pre-sale starts [7/7 midnight] 
+    saleDate = 1536454800;         // unix epoch public sale start date [9/9/2018 1am] 
     endDate = saleDate + 32 days;     // 32 days after main sale starts [9/9 midnight]
 
     saleState = state.pendingStart;
