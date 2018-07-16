@@ -54,7 +54,10 @@ contract Token is IERC20Token, Owned {
   }
 
   /* Approve other address to spend tokens on your account */
-  function approve(address _spender, uint256 _value) public returns (bool success) {
+  function approve(address _spender, uint256 _currentValue, uint256 _value) public returns (bool success) {
+    // prevent attack vector
+    require(allowances[msg.sender][_spender] == _currentValue);
+    
     allowances[msg.sender][_spender] = _value;        // Set allowance
     emit Approval(msg.sender, _spender, _value);           // Raise Approval event
     return true;
