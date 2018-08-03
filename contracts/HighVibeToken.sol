@@ -53,44 +53,6 @@ contract HighVibeToken is Token {
         transfersEnabled = !_disable;
     }
 
-    /**
-        @dev increases the token supply and sends the new tokens to an account
-        can only be called by the contract owner
-
-        @param _to         account to receive the new amount
-        @param _amount     amount to increase the supply by
-    */
-    function issue(address _to, uint256 _amount)
-        public
-        onlyOwner
-        validAddress(_to)
-        notThis(_to)
-    {
-        supply = supply.add(_amount);
-        balances[_to] = balances[_to].add(_amount);
-
-        emit Issuance(_amount);
-        emit Transfer(this, _to, _amount);
-    }
-
-    /**
-        @dev removes tokens from an account and decreases the token supply
-        can be called by the contract owner to destroy tokens from any account or by any holder to destroy tokens from his/her own account
-
-        @param _from       account to remove the amount from
-        @param _amount     amount to decrease the supply by
-    */
-    function destroy(address _from, uint256 _amount) public {
-        require(msg.sender == _from || msg.sender == owner); // validate input
-        require(balances[_from] >= _amount);
-
-        balances[_from] = balances[_from].sub(_amount);
-        supply = supply.sub(_amount);
-
-        emit Transfer(_from, this, _amount);
-        emit Destruction(_amount);
-    }
-
     // ERC20 standard method overrides with some extra functionality
 
     /**
