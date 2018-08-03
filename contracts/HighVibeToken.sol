@@ -18,6 +18,7 @@ contract HighVibeToken is Token {
     name = "HighVibe";
     symbol = "HV"; // token symbol
     decimals = 18;
+    cap = 8000000000 ether; // 8,000,000,000 tokens - should match maxTokenSupply in HighVibeCrowdsale.sol
   }
 
   function setCrowdsale(address _crowdsaleAddress) public onlyOwner {

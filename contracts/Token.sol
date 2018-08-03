@@ -4,7 +4,6 @@ import "./Interfaces/ITokenRecipient.sol";
 import "./Interfaces/IERC20Token.sol";
 import "./Utils/Owned.sol";
 import "./Utils/SafeMath.sol";
-import "./Utils/Lockable.sol";
 
 contract Token is IERC20Token, Owned {
 
@@ -15,6 +14,7 @@ contract Token is IERC20Token, Owned {
   string public name;
   string public symbol;
   uint8 public decimals;
+  uint public cap;
 
   address public crowdsaleContractAddress;
 
@@ -54,12 +54,40 @@ contract Token is IERC20Token, Owned {
   }
 
   /* Approve other address to spend tokens on your account */
-  function approve(address _spender, uint256 _currentValue, uint256 _value) public returns (bool success) {
-    // prevent attack vector
-    require(allowances[msg.sender][_spender] == _currentValue);
+  function approve(address _spender, uint256 _value) public returns (bool success) {
     
     allowances[msg.sender][_spender] = _value;        // Set allowance
     emit Approval(msg.sender, _spender, _value);           // Raise Approval event
+    return true;
+  }
+
+  function increaseApproval(
+    address _spender,
+    uint256 _addedValue
+  )
+    public
+    returns (bool)
+  {
+    allowances[msg.sender][_spender] = (
+      allowances[msg.sender][_spender].add(_addedValue));
+    emit Approval(msg.sender, _spender, allowances[msg.sender][_spender]);
+    return true;
+  }
+
+  function decreaseApproval(
+    address _spender,
+    uint256 _subtractedValue
+  )
+    public
+    returns (bool)
+  {
+    uint256 oldValue = allowances[msg.sender][_spender];
+    if (_subtractedValue >= oldValue) {
+      allowances[msg.sender][_spender] = 0;
+    } else {
+      allowances[msg.sender][_spender] = oldValue.sub(_subtractedValue);
+    }
+    emit Approval(msg.sender, _spender, allowances[msg.sender][_spender]);
     return true;
   }
 
@@ -87,14 +115,15 @@ contract Token is IERC20Token, Owned {
     return allowances[_owner][_spender];
   }
 
-  function mintTokens(address _to, uint256 _amount) onlyCrowdsaleOwner {
+  function mintTokens(address _to, uint256 _amount) onlyCrowdsaleOwner public {
+    require(supply.add(_amount) <= cap);
     supply = supply.add(_amount);
     balances[_to] = balances[_to].add(_amount);
     emit Mint(_to, _amount);
     emit Transfer(msg.sender, _to, _amount);
   }
 
-  function salvageTokensFromContract(address _tokenAddress, address _to, uint _amount) onlyOwner {
+  function salvageTokensFromContract(address _tokenAddress, address _to, uint _amount) onlyOwner public {
     IERC20Token(_tokenAddress).transfer(_to, _amount);
   }
 }
